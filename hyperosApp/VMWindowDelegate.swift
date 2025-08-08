@@ -12,6 +12,7 @@ let bundleExt = ".bundle"
 @main
 class VMWindowDelegate: NSObject, NSApplicationDelegate, VZVirtualMachineDelegate {
     private var vmData:VMData
+    @IBOutlet weak var mainWindow: VMCardWall!
     @IBOutlet weak var wizard: NSWindow!
     
     @IBOutlet var window: NSWindow!
@@ -266,14 +267,8 @@ class VMWindowDelegate: NSObject, NSApplicationDelegate, VZVirtualMachineDelegat
             })
         }
     }
-
-    func applicationDidFinishLaunching(_ aNotification: Notification) {
-        NSApp.activate(ignoringOtherApps: true)
-
-        // If "GUI Linux VM.bundle" doesn't exist, the sample app tries to create
-        // one and install Linux onto an empty disk image from the ISO image,
-        // otherwise, it tries to directly boot from the disk image inside
-        // the "GUI Linux VM.bundle".
+    
+    func launchWizard(_ sender: Any?) {
         let bundlePath = self.bundlePath()
         if !FileManager.default.fileExists(atPath: bundlePath) {
             self.vmData.needsInstall = true
@@ -298,6 +293,81 @@ class VMWindowDelegate: NSObject, NSApplicationDelegate, VZVirtualMachineDelegat
             self.vmData.needsInstall = false
             configureAndStartVirtualMachine()
         }
+    }
+    
+    func getBundleName(fromPath path:String) -> String {
+        guard path != "" else {
+            fatalError("path is an empty string")
+        }
+        let fileName = URL(fileURLWithPath: path).deletingPathExtension().lastPathComponent
+        return fileName
+    }
+    
+    func loadDataFromBundle(path:String)-> VMData {
+        let fileURL = URL(fileURLWithPath: path + "/machine.json")
+        do {
+            let data = try Data(contentsOf: fileURL)
+            let decoder = JSONDecoder()
+            let decodedObject = try decoder.decode(VMData.self, from: data)
+            return decodedObject
+        } catch {
+            fatalError("Error decoding JSON from file: \(error)")
+        }
+    }
+    
+    func saveDataToBundle(path:String, vmData:VMData) {
+        let fileURL = URL(fileURLWithPath: path + "/machine.json")
+        do {
+            let encoder = JSONEncoder()
+            encoder.outputFormatting = [.prettyPrinted]
+            let data = try encoder.encode(vmData)
+            try data.write(to: fileURL)
+        } catch {
+            fatalError("Error coding JSON to file: \(error)")
+        }
+    }
+    
+    func enumerateVMs(atPath path: String, withExtension fileExtension: String) -> [VMData] {
+        var vmlist: [VMData] = []
+        let fileManager = FileManager.default
+
+        do {
+            // Get the contents of the directory
+            let items = try fileManager.contentsOfDirectory(atPath: path)
+
+            // Filter the items to find directories with the specified extension
+            let directoriesWithExtension = items.filter { item in
+                let fullPath = (path as NSString).appendingPathComponent(item)
+                var isDirectory: ObjCBool = false
+                fileManager.fileExists(atPath: fullPath, isDirectory: &isDirectory)
+                return isDirectory.boolValue && item.hasSuffix(".\(fileExtension)")
+            }
+
+            // Print the directories found
+            for directory in directoriesWithExtension {
+                let vmdata = loadDataFromBundle(path: directory)
+                vmlist.append(vmdata)
+            }
+            return vmlist
+        } catch {
+            print("Error reading directory: \(error.localizedDescription)")
+            return []
+        }
+    }
+    
+    func prepareWall(_ vms:[VMData]) {
+        mainWindow.configure(vmList: vms)
+    }
+
+    func applicationDidFinishLaunching(_ aNotification: Notification) {
+        NSApp.activate(ignoringOtherApps: true)
+
+        // If "GUI Linux VM.bundle" doesn't exist, the sample app tries to create
+        // one and install Linux onto an empty disk image from the ISO image,
+        // otherwise, it tries to directly boot from the disk image inside
+        // the "GUI Linux VM.bundle".
+        var vms:[VMData] = enumerateVMs(atPath: vmPath, withExtension: bundleExt)
+        prepareWall(vms)
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool {
