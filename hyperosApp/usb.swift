@@ -154,7 +154,7 @@ class usbDelegate: USBWatcherDelegate {
         var iterator: io_iterator_t = 0
 
         let matchingDict = IOServiceMatching(kIOUSBDeviceClassName)
-        notificationPort = IONotificationPortCreate(kIOMasterPortDefault)
+        notificationPort = IONotificationPortCreate(kIOMainPortDefault)
 
         let addedCallback: IOServiceMatchingCallback = { (refcon, iterator) in
             print("addedCallback")
