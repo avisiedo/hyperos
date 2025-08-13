@@ -11,6 +11,7 @@ import Foundation
 import IOKit
 import IOKit.usb
 import IOKit.usb.IOUSBLib
+import Virtualization
 
 public protocol USBWatcherDelegate: AnyObject {
     /// Called on the main thread when a device is connected.
@@ -90,6 +91,36 @@ extension io_object_t {
             return nil
         }
     }
+    
+    func getProperty<T>(key: String) -> T? {
+        let keyAsCFString = key as CFString
+        let value = IORegistryEntryCreateCFProperty(self, keyAsCFString, kCFAllocatorDefault, 0).takeRetainedValue()
+        return value as? T
+    }
+    
+    var usbVendorName: String? {
+        return getProperty(key: "USB Vendor Name")
+    }
+    
+    var usbProductName: String? {
+        return getProperty(key: "USB Product Name")
+    }
+    
+    var usbSerialNumber: String? {
+        return getProperty(key: "USB Serial Number")
+    }
+    
+    var idVendor: Int? {
+        return getProperty(key: "idVendor")
+    }
+    
+    var idProduct: Int? {
+        return getProperty(key: "idProduct")
+    }
+    
+    var bDeviceClass: Int? {
+        return getProperty(key: "bDeviceClass")
+    }
 }
 
 class usbDelegate: USBWatcherDelegate {
@@ -104,5 +135,12 @@ class usbDelegate: USBWatcherDelegate {
 
     func deviceRemoved(_ device: io_object_t) {
         print("device removed: \(device.name() ?? "<unknown>") (\(device.formatted()))")
+    }
+}
+
+class usbDevice: NSObject, VZUSBDeviceConfiguration {
+    var uuid: UUID
+    init(uuid: UUID) {
+        self.uuid = uuid
     }
 }

@@ -353,7 +353,8 @@ class VMWindowDelegate: NSObject, NSApplicationDelegate, VZVirtualMachineDelegat
     // MARK: USB Discovery
     
     func deviceAdded(_ device: io_object_t) {
-        // print("device added: \(device.name() ?? "<unknown>") (\(device.formatted()))")
+        if device.bDeviceClass! == 9 { return }
+        print("deviceAdded: \(device.name() ?? "<unknown>") (\(device.formatted()))")
         let menuItem: DeviceMenuItem = DeviceMenuItem()
         menuItem.device = device
         menuItem.title = device.name() ?? "<unknown>"
@@ -363,7 +364,7 @@ class VMWindowDelegate: NSObject, NSApplicationDelegate, VZVirtualMachineDelegat
     }
 
     func deviceRemoved(_ device: io_object_t) {
-        // print("device removed: \(device.name() ?? "<unknown>") (\(device.formatted()))")
+        print("deviceRemoved: \(device.name() ?? "<unknown>") (\(device.formatted()))")
         for item in DevicesMenu.items {
             if let menuItem = item as? DeviceMenuItem, menuItem.device == device {
                 if menuItem.state == .on {
