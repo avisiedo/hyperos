@@ -38,9 +38,9 @@ public class USBWatcher {
             let watcher = Unmanaged<USBWatcher>.fromOpaque(instance!).takeUnretainedValue()
             let handler: ((io_iterator_t) -> Void)?
             switch iterator {
-            case watcher.addedIterator: handler = watcher.delegate?.deviceAdded
-            case watcher.removedIterator: handler = watcher.delegate?.deviceRemoved
-            default: assertionFailure("received unexpected IOIterator"); return
+                case watcher.addedIterator: handler = watcher.delegate?.deviceAdded
+                case watcher.removedIterator: handler = watcher.delegate?.deviceRemoved
+                default: assertionFailure("received unexpected IOIterator"); return
             }
             while case let device = IOIteratorNext(iterator), device != IO_OBJECT_NULL {
                 handler?(device)
@@ -94,7 +94,7 @@ extension io_object_t {
     
     func getProperty<T>(key: String) -> T? {
         let keyAsCFString = key as CFString
-        let value = IORegistryEntryCreateCFProperty(self, keyAsCFString, kCFAllocatorDefault, 0).takeRetainedValue()
+        let value = IORegistryEntryCreateCFProperty(self, keyAsCFString, kCFAllocatorDefault, 0)?.takeRetainedValue()
         return value as? T
     }
     
@@ -118,8 +118,31 @@ extension io_object_t {
         return getProperty(key: "idProduct")
     }
     
+    // bDeviceClass is 9 for HUB controller.
     var bDeviceClass: Int? {
         return getProperty(key: "bDeviceClass")
+    }
+
+    // MARK: Properties for USB type indicator
+
+    // USBSpeed represents the speed of the USB bus where the device is connected.
+    var usbSpeed: Int? {
+        return getProperty(key: "USBSpeed")
+    }
+
+    // DeviceSpeec represents the maximimum available of the device, that will not be higher
+    // than the device bus speed.
+    var deviceSpeed: Int? {
+        return getProperty(key: "Device Speed")
+    }
+
+    // MARK: Identification
+
+    var sessionID: Int? {
+        return getProperty(key: "sessionID")
+    }
+    var locationID: Int? {
+        return getProperty(key: "locationID")
     }
 }
 
@@ -127,10 +150,27 @@ class usbDelegate: USBWatcherDelegate {
     private var usbWatcher: USBWatcher!
     init(_ delegate:USBWatcherDelegate!) {
         usbWatcher = USBWatcher(delegate: delegate)
+        var notificationPort: IONotificationPortRef?
+        var iterator: io_iterator_t = 0
+
+        let matchingDict = IOServiceMatching(kIOUSBDeviceClassName)
+        notificationPort = IONotificationPortCreate(kIOMasterPortDefault)
+
+        let addedCallback: IOServiceMatchingCallback = { (refcon, iterator) in
+            print("addedCallback")
+        }
+
+        let removedCallback: IOServiceMatchingCallback = { (refcon, iterator) in
+            print("removedCallback")
+        }
+
+        IOServiceAddMatchingNotification(notificationPort!, kIOGeneralInterest, matchingDict, addedCallback, nil, &iterator)
+        IOServiceAddMatchingNotification(notificationPort!, kIOGeneralInterest, matchingDict, removedCallback, nil, &iterator)
     }
 
     func deviceAdded(_ device: io_object_t) {
-        print("device added: \(device.name() ?? "<unknown>") (\(device.formatted()))")
+        let unknown: String = "<unknown>"
+        print("device added: \(device.name() ?? unknown) (locationID=\(device.locationID ?? -1); sessionID=\(device.sessionID ?? -1)")
     }
 
     func deviceRemoved(_ device: io_object_t) {

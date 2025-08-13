@@ -34,8 +34,8 @@ class VMWindowDelegate: NSObject, NSApplicationDelegate, VZVirtualMachineDelegat
 
     override init() {
         self.vmData = VMDefaultLinux()
+        self.usbWatcher = nil
         super.init()
-        self.usbWatcher = USBWatcher(delegate: self)
     }
     
     private func bundlePath() -> String {
@@ -298,6 +298,7 @@ class VMWindowDelegate: NSObject, NSApplicationDelegate, VZVirtualMachineDelegat
     }
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
+        self.usbWatcher = USBWatcher(delegate: self)
         NSApp.activate(ignoringOtherApps: true)
 
         // If "GUI Linux VM.bundle" doesn't exist, the sample app tries to create
@@ -353,26 +354,41 @@ class VMWindowDelegate: NSObject, NSApplicationDelegate, VZVirtualMachineDelegat
     // MARK: USB Discovery
     
     func deviceAdded(_ device: io_object_t) {
-        if device.bDeviceClass! == 9 { return }
+        if device.bDeviceClass != nil && (device.bDeviceClass!) == 9 { return }
         print("deviceAdded: \(device.name() ?? "<unknown>") (\(device.formatted()))")
         let menuItem: DeviceMenuItem = DeviceMenuItem()
         menuItem.device = device
         menuItem.title = device.name() ?? "<unknown>"
+        menuItem.bDeviceClass = device.bDeviceClass
+        menuItem.idVendor = device.idVendor
+        menuItem.idProduct = device.idProduct
+        menuItem.usbVendorName = device.usbVendorName
+        menuItem.usbProductName = device.usbProductName
+        menuItem.usbSerialNumber = device.usbSerialNumber
+        menuItem.usbSpeed = device.usbSpeed
+        menuItem.deviceSpeed = device.deviceSpeed
+        menuItem.sessionID = device.sessionID
+        menuItem.locationID = device.locationID
         menuItem.isEnabled = true
         menuItem.action = #selector(attachDeviceMenuItem(_:))
         DevicesMenu.addItem(menuItem)
     }
 
     func deviceRemoved(_ device: io_object_t) {
+        if device.bDeviceClass != nil && (device.bDeviceClass!) == 9 { return }
         print("deviceRemoved: \(device.name() ?? "<unknown>") (\(device.formatted()))")
         for item in DevicesMenu.items {
-            if let menuItem = item as? DeviceMenuItem, menuItem.device == device {
-                if menuItem.state == .on {
-                    self.attachDevice(menuItem.device)
-                    menuItem.state = .off
+            if let menuItem = item as? DeviceMenuItem {
+                let menuLocationID: Int? = menuItem.locationID
+                let deviceLocationID: Int? = device.locationID
+                if menuLocationID != nil && deviceLocationID != nil && menuLocationID! == deviceLocationID! {
+                    if menuItem.state == .on {
+                        self.dettachDevice(menuItem.device)
+                        menuItem.state = .off
+                    }
+                    DevicesMenu.removeItem(menuItem)
+                    return
                 }
-                DevicesMenu.removeItem(menuItem)
-                break
             }
         }
     }
