@@ -395,6 +395,8 @@ class VMWindowDelegate: NSObject, NSApplicationDelegate, VZVirtualMachineDelegat
     
     @objc func attachDeviceMenuItem(_ sender: DeviceMenuItem) {
         // TODO Implement actions
+        // See: https://docs.getutm.app/guest-support/macos/#missing-features
+        // Actually this feature is not supported by the virtualization framework
         print("attachDeviceMenuItem is not implemented")
         sender.state = .on
         sender.action = #selector(self.dettachDeviceMenuItem(_:))
@@ -402,6 +404,8 @@ class VMWindowDelegate: NSObject, NSApplicationDelegate, VZVirtualMachineDelegat
     
     @objc func dettachDeviceMenuItem(_ sender: DeviceMenuItem) {
         // TODO Implement actions
+        // See: https://docs.getutm.app/guest-support/macos/#missing-features
+        // Actually this feature is not supported by the virtualization framework
         print("dettachDeviceMenuItem is not implemented")
         sender.state = .off
         sender.action = #selector(self.attachDeviceMenuItem(_:))

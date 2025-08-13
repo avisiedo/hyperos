@@ -178,9 +178,22 @@ class usbDelegate: USBWatcherDelegate {
     }
 }
 
-class usbDevice: NSObject, VZUSBDeviceConfiguration {
+@available(macOS 15.0, *)
+class usbDevice: NSObject, VZUSBDevice {
+    var usbController: VZUSBController?
     var uuid: UUID
-    init(uuid: UUID) {
+    init(attachedTo controller:VZUSBController, uuid: UUID) {
+        self.usbController = controller
         self.uuid = uuid
     }
 }
+
+@available(macOS 15.0, *)
+class usbDeviceConfiguration: NSObject, VZUSBDeviceConfiguration {
+    var uuid: UUID
+    init(_ uuid:UUID) {
+        self.uuid = uuid
+    }
+}
+
+
