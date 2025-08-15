@@ -25,6 +25,10 @@ class VMWindowDelegate: NSObject, NSApplicationDelegate, VZVirtualMachineDelegat
     
     @IBOutlet weak var virtualMachineView: VZVirtualMachineView!
     
+    @IBOutlet weak var vmStateStartMenuItem: NSMenuItem!
+    @IBOutlet weak var vmStateStopMenuItem: NSMenuItem!
+    @IBOutlet weak var vmStatePauseMenuItem: NSMenuItem!
+    @IBOutlet weak var vmStateResumeMenuItem: NSMenuItem!
     private var virtualMachine: VZVirtualMachine!
     private var usbWatcher: USBWatcher!
 
@@ -160,7 +164,6 @@ class VMWindowDelegate: NSObject, NSApplicationDelegate, VZVirtualMachineDelegat
     private func createNetworkDeviceConfiguration() -> VZVirtioNetworkDeviceConfiguration {
         let networkDevice = VZVirtioNetworkDeviceConfiguration()
         networkDevice.attachment = VZNATNetworkDeviceAttachment()
-
         return networkDevice
     }
     
@@ -389,27 +392,109 @@ class VMWindowDelegate: NSObject, NSApplicationDelegate, VZVirtualMachineDelegat
     
     @objc func attachDevice(_ device: io_object_t) {
         print("attach device: \(device.name() ?? "<unknown>") (\(device.formatted()))")
+//        self.virtualMachine.usbControllers[0].attach(device)
     }
         
     @objc func dettachDevice(_ device: io_object_t) {
         print("dettach device: \(device.name() ?? "<unknown>") (\(device.formatted()))")
     }
         
-    // MARK: VM Actions Menu Item
-    
+    // MARK: VM Actions Menu Item + VZVirtualMachineDelegate
+
+//    func guestDidStop(_ virtualMachine: VZVirtualMachine) {
+//        self.vmStateStopMenuItem.state = .off
+//        self.vmStateStartMenuItem.state = .on
+//        self.vmStateResumeMenuItem.state = .off
+//        self.vmStatePauseMenuItem.state = .on
+//    }
+
     @IBAction func startVM(_ sender: Any) {
-        print("start vm")
+        switch self.virtualMachine.state {
+            case .running:
+                return
+            case .paused:
+                print("resuming vm")
+                self.resumeVM(self)
+                self.vmStateStopMenuItem.state = .on
+                self.vmStateStartMenuItem.state = .off
+                self.vmStateResumeMenuItem.state = .off
+                self.vmStatePauseMenuItem.state = .on
+                return
+            case .stopped:
+                print("starting vm")
+                self.startVM(self)
+                self.vmStateStopMenuItem.state = .on
+                self.vmStateStartMenuItem.state = .off
+                self.vmStateResumeMenuItem.state = .off
+                self.vmStatePauseMenuItem.state = .on
+                return
+            case .error:
+                return
+            @unknown default:
+                return
+        }
     }
     
     @IBAction func pauseVM(_ sender: Any) {
-        print("pause vm")
+        switch self.virtualMachine.state {
+            case .running:
+                print("pausing vm")
+                self.pauseVM(self)
+                self.vmStateStopMenuItem.state = .off
+                self.vmStateStartMenuItem.state = .off
+                self.vmStateResumeMenuItem.state = .on
+                self.vmStatePauseMenuItem.state = .off
+                return
+            case .paused:
+                return
+            case .stopped:
+                return
+            case .error:
+                return
+            default:
+                return
+        }
     }
 
     @IBAction func resumeVM(_ sender: Any) {
-        print("resume vm")
+        switch self.virtualMachine.state {
+            case .running:
+                return
+            case .paused:
+                print("resuming vm")
+                self.resumeVM(self)
+                self.vmStateStopMenuItem.state = .on
+                self.vmStateStartMenuItem.state = .off
+                self.vmStateResumeMenuItem.state = .off
+                self.vmStatePauseMenuItem.state = .on
+                return
+            case .stopped:
+                return
+            case .error:
+                return
+            @unknown default:
+                return
+        }
     }
 
     @IBAction func stopVM(_ sender: Any) {
-        print("stop vm")
+        switch self.virtualMachine.state {
+            case .running:
+                print("stopping vm")
+                self.resumeVM(self)
+                self.vmStateStopMenuItem.state = .off
+                self.vmStateStartMenuItem.state = .on
+                self.vmStateResumeMenuItem.state = .off
+                self.vmStatePauseMenuItem.state = .off
+                return
+            case .paused:
+                return
+            case .stopped:
+                return
+            case .error:
+                return
+            @unknown default:
+                return
+        }
     }
 }

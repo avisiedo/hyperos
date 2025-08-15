@@ -18,6 +18,10 @@
             <connections>
                 <outlet property="DevicesMenu" destination="bAW-dl-Exa" id="6ev-fr-Cec"/>
                 <outlet property="virtualMachineView" destination="EiT-Mj-1SZ" id="IO0-2v-dc2"/>
+                <outlet property="vmStatePauseMenuItem" destination="JHX-yD-96a" id="tRp-dt-F3m"/>
+                <outlet property="vmStateResumeMenuItem" destination="N4U-Ws-oVy" id="vd0-ws-Nn9"/>
+                <outlet property="vmStateStartMenuItem" destination="nSG-4e-sTY" id="Q33-3N-NSP"/>
+                <outlet property="vmStateStopMenuItem" destination="z9o-Bk-neN" id="zrt-hh-Mz8"/>
                 <outlet property="window" destination="QvC-M9-y7g" id="gIp-Ho-8D9"/>
                 <outlet property="wizard" destination="ZoS-r0-ltN" id="htM-Mh-4du"/>
             </connections>
