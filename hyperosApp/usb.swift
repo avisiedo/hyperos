@@ -12,6 +12,7 @@ import IOKit
 import IOKit.usb
 import IOKit.usb.IOUSBLib
 import Virtualization
+import IOUSBHost
 
 public protocol USBWatcherDelegate: AnyObject {
     /// Called on the main thread when a device is connected.
@@ -189,10 +190,20 @@ class usbDevice: NSObject, VZUSBDevice {
 }
 
 @available(macOS 15.0, *)
-class usbDeviceConfiguration: NSObject, VZUSBDeviceConfiguration {
+class usbDevicePassthrough: NSObject, VZUSBDeviceConfiguration {
     var uuid: UUID
-    init(_ uuid:UUID) {
-        self.uuid = uuid
+    init(_ data:io_object_t) {
+        guard data.locationID != nil else {
+            fatalError("locationID is nil")
+        }
+        guard data.idVendor != nil else {
+            fatalError("idVendor is nil")
+        }
+        guard data.idProduct != nil else {
+            fatalError("idProduct is nil")
+        }
+        self.uuid = UUID(uuidString: "0b100000" + "-" + String(format:"%04X", data.locationID!) + "-" + String(format:"%04X", data.idVendor!) + "-" + String(format:"%04X", data.idProduct!) + "-" + "000000000000")!
+        super.init()
     }
 }
 

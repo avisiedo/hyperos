@@ -339,7 +339,14 @@ class VMWindowDelegate: NSObject, NSApplicationDelegate, VZVirtualMachineDelegat
         exit(-1)
     }
 
+    func completionNilHandler(_ err: Error?) -> Void {
+        print("completionNilHandler")
+    }
+
     func guestDidStop(_ virtualMachine: VZVirtualMachine) {
+//        if virtualMachine.graphicsDevices.count > 0 {
+//            virtualMachine.usbControllers[0].attach(device: <#T##any VZUSBDevice#>, completionHandler: completionNilHandler)
+//        }
         print("Guest did stop virtual machine.")
         exit(0)
     }
