@@ -1,35 +1,84 @@
-# VM Management using hypervisor framework on a Mac
+# Hyper OS Application
 
-Install and run GUI Linux in a virtual machine using the Virtualization framework.
+Intent to create a VM manager for macos based on the virtualization framework.
+
+The initial state is coming from the sample code from the documentation at:
+https://developer.apple.com/documentation/virtualization/running-gui-linux-in-a-virtual-machine-on-a-mac
 
 ## Overview
 
-This code is a modified version from: https://developer.apple.com/documentation/virtualization/running-gui-linux-in-a-virtual-machine-on-a-mac
-
 Intentions:
+
+- Store all the necessary information to instantiate the VM in a bundle.
+  - The bundle will have the extension .hyperos
+  - The configuration will be stored as a yaml file at the bundle directory.
+    - Type of OS => Linux, MacOS, Windows*, BSD*
+  - The disks will be stored inside the bundle directory.
+  - The snapshots will be stored inside the bundle directory.
+
+> Windows 11 support requires TPM2.0 emulation; design decission here about
+> store one keychein per VM at user scope, or one keychain for all the VM
+> per user (if there are two users in the systems, they are "isolated", but
+> this avoid Shared VMs between the users.
+
+---
+
+> Once TPM2.0 is emulated, the intention is provide by default in the Linux and
+> BSD profiles by default, and some initialization to enroll the PK and MOK in
+> the TPM for allowing secure boot booting for the OSs.
 
 - Support multiple VMs and manage them.
   - Common directory store all the VM bundles.
 - Add a wizard to create new VM.
-  - Basic version.
-  - Add support to add devices.
-    - Virtual disks.
+  - Basic version (We select Fedora or macos initially).
+  - Basic 2 version (We select Linux distro + version, and macos version)
+    - Add ISO auto-download for the OS selected and version.
+    - Verify ISO downloaded for the OS selected and version (verify CHECKSUM file
+      by using the public key of the distro and version, check ISO hash with the
+      checksum file).
+    - ISO, Checksums and public keys for verification are stored at
+      ~/Virtual Machines/Cache/<{linux-distroname-version}>/{gpgkey.gpg, ...-CHECKSUM, .iso}
+      That 3 files are cached to accelerate new VM creation.
+  - Support custom device configurations.
+    - Additional virtual disks.
+    - Add shared folders between host and guest.
     - Passthrough USB devices.
-    - Add shared folders.
+    - Share CUPS printers => CUPS proxy to communicate betweeen guest and host.
+      - The guest agent MUST run in an isolated way (SELinux or AppArmor for Linux,
+        jails for BSD systems, gatekeeper for macos, no idea for Windows).
+    - Passthrough macos devices (Camera)
+    - Share bluetooth devices by using a guest agent which communicate with the
+      host by using a proxy.
+      - The guest agent MUST run in an isolated way (SELinux or AppArmor for Linux,
+        hails for BSD systems, gatekeeper for macos, no idea for Windows).
+  - Support Unattended installation.
+    - Windows
+    - Linux Fedora
+      - Classic
+      - Silverblue
+      - Botoc
+    - Debian/Ubuntu
+    - Macos
+    - BSD
 - Add support for macos guest.
   - Install and run.
-  - Run in DFU mode.
+  - Run in DFU mode (Data Firmware Uploader).
+    This would allow to research DFU mode.
   - Run in Recovery mode.
+    This would allow to research in Recovery mode.
 - Add auto download ISO, and check them.
 - Add support for Windows guest (platform requires TPM 2)
 - Add support for OpenBSD guest.
 - Add support for NetBSD guest.
 - Add support for FreeBSD guest.
-- Add Serial port for terminal only VMs
+- Add Serial port for terminal only VMs, useful for automation from the cli.
 - Add CLI tool hyperosctl => automation from the cli.
-- Add malware behaviors analysis:
+- Add Sandboxes for malware behaviors analysis:
   - Wizard to create sandboxes with CAPE v2 (Linux, Windows, macos)
   - Add automation to analyze a sample, and extract report.
+    - Always generate a snapshot from the original VM,
+      install and configure the necessary tools, and finally
+      execute the sample to analyze it.
 - Encrypt VM Disk.
   - Creation of encrypted.
   - Integrate with keychain (store keys encrypted)
@@ -56,6 +105,43 @@ Intentions:
       - Gather memory usage.
       - Gather audit logs.
         - Add advanced monitoring agent.
+
+## Feature Matrix
+
+Feature         | Linux   | macos   | Windows  | BSD |
+------------------------------------------------------
+TPM2.0          | No      | No      | No       | No  |
+Download ISO    | No      | No      | No       | No  |
+Verify ISO      | No      | No      | No       | No  |
+
+Share Folder    | No      | No      | No       | No  |
+Share USB       | No      | No      | No       | No  |
+Share Cammera   | No      | No      | No       | No  |
+Share Bluetooth | No      | No      | No       | No  |
+
+Network Manager | NO
+ Define Virtual Switches
+ Attach interfaces to switches
+ Add DHCP server
+  Edit DHCP server options
+ Add domain server
+  Add Bind Server
+  Add CA Issuer
+   Add ACME support
+  Add DNSSEC support
+  Add DoT support
+  Add DoH support
+ Auto-enroll new VMs on domain.
+  Automation per OS for enrolling into the domain server.
+  Automation of hosts policies and configuration.
+ Add monitoring services:
+  Gather cpu usage
+  Gather memory usage
+  Gather audit logs
+   Add advanced monitoring agent
+
+
+
 
 ---
 
