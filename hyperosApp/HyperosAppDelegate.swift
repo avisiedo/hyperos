@@ -6,4 +6,21 @@
 //  Copyright © 2025 Apple. All rights reserved.
 //
 
-import Foundation
+import SwiftUI
+
+class AppDelegate: VMListDelegate {
+    actor viewModel: AppViewModel {
+        .init()
+    }
+}
+
+struct HyperosApp: App {
+    var listDelegate: VMListDelegate?
+    var delegate: AppDelegate?
+    var body: some Scene {
+        WindowGroup {
+            VMList(self.listDelegate)
+        }
+    }
+}
+
