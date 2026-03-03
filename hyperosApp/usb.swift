@@ -145,6 +145,8 @@ extension io_object_t {
     var locationID: Int? {
         return getProperty(key: "locationID")
     }
+    
+    // MARK:
 }
 
 class usbDelegate: USBWatcherDelegate {
@@ -170,22 +172,37 @@ class usbDelegate: USBWatcherDelegate {
     }
 
     func deviceAdded(_ device: io_object_t) {
-        let unknown: String = "<unknown>"
-        print("device added: \(device.name() ?? unknown) (locationID=\(device.locationID ?? -1); sessionID=\(device.sessionID ?? -1)")
+//        if #available(macOS 15.0, *) {
+//            let device = usbDevice(attachedTo: nil, data: device)
+//        } else {
+            // Fallback on earlier versions
+            print("device added: \(device.name() ?? "<unknown>") (\(device.formatted()))")
+//        }
     }
 
     func deviceRemoved(_ device: io_object_t) {
         print("device removed: \(device.name() ?? "<unknown>") (\(device.formatted()))")
     }
+    
 }
 
 @available(macOS 15.0, *)
 class usbDevice: NSObject, VZUSBDevice {
     var usbController: VZUSBController?
     var uuid: UUID
-    init(attachedTo controller:VZUSBController, uuid: UUID) {
-        self.usbController = controller
-        self.uuid = uuid
+    init(attachedTo: VZUSBController?, data:io_object_t) {
+        guard data.locationID != nil else {
+            fatalError("locationID is nil")
+        }
+        guard data.idVendor != nil else {
+            fatalError("idVendor is nil")
+        }
+        guard data.idProduct != nil else {
+            fatalError("idProduct is nil")
+        }
+        self.uuid = UUID(uuidString: "0b100000" + "-" + String(format:"%04X", data.locationID!) + "-" + String(format:"%04X", data.idVendor!) + "-" + String(format:"%04X", data.idProduct!) + "-" + "000000000000")!
+        self.usbController = attachedTo
+        super.init()
     }
 }
 

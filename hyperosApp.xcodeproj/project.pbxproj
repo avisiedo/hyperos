@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 55;
+	objectVersion = 70;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -14,6 +14,7 @@
 		B30195FD2E4B941A00D9B68A /* usb.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30195FC2E4B941100D9B68A /* usb.swift */; };
 		B30BD88F2E447110000288DD /* vmdata.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30BD88E2E44710B000288DD /* vmdata.swift */; };
 		B30BD8912E44713A000288DD /* vmdata_builder.swift in Sources */ = {isa = PBXBuildFile; fileRef = B30BD8902E447135000288DD /* vmdata_builder.swift */; };
+		B365D6EC2F54612E00962023 /* Package.swift in Sources */ = {isa = PBXBuildFile; fileRef = B365D6EB2F54612B00962023 /* Package.swift */; };
 		B38E9EF02E4C5C61005CF625 /* device_menu_item.swift in Sources */ = {isa = PBXBuildFile; fileRef = B38E9EEF2E4C5C5A005CF625 /* device_menu_item.swift */; };
 		B3917B8A2E435E770082C557 /* HyperosAppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B3917B892E435E770082C557 /* HyperosAppDelegate.swift */; };
 /* End PBXBuildFile section */
@@ -31,10 +32,21 @@
 		B30195FC2E4B941100D9B68A /* usb.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = usb.swift; sourceTree = "<group>"; };
 		B30BD88E2E44710B000288DD /* vmdata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = vmdata.swift; sourceTree = "<group>"; };
 		B30BD8902E447135000288DD /* vmdata_builder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = vmdata_builder.swift; sourceTree = "<group>"; };
+		B365D6EB2F54612B00962023 /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 		B38E9EEF2E4C5C5A005CF625 /* device_menu_item.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = device_menu_item.swift; sourceTree = "<group>"; };
 		B3917B892E435E770082C557 /* HyperosAppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HyperosAppDelegate.swift; sourceTree = "<group>"; };
 		E489E24B87B74AAC6D64B249 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		B3960CB72F52CE5000E5B1CC /* App */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = App; sourceTree = "<group>"; };
+		B3960CB82F52CE5A00E5B1CC /* Common */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Common; sourceTree = "<group>"; };
+		B3960CB92F52CE6A00E5B1CC /* Core */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Core; sourceTree = "<group>"; };
+		B3960CBA2F52CE8000E5B1CC /* Modules */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Modules; sourceTree = "<group>"; };
+		B3960CBB2F52CE9600E5B1CC /* Entities */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Entities; sourceTree = "<group>"; };
+		B3960CBC2F52CEA500E5B1CC /* Resources */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Resources; sourceTree = "<group>"; };
+		B3960CBD2F52CEAC00E5B1CC /* Tests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = Tests; sourceTree = "<group>"; };
+/* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		8FF8298627500C060037FA83 /* Frameworks */ = {
@@ -79,6 +91,14 @@
 		8FF8298B27500C060037FA83 /* hyperosApp */ = {
 			isa = PBXGroup;
 			children = (
+				B365D6EB2F54612B00962023 /* Package.swift */,
+				B3960CB72F52CE5000E5B1CC /* App */,
+				B3960CB82F52CE5A00E5B1CC /* Common */,
+				B3960CB92F52CE6A00E5B1CC /* Core */,
+				B3960CBA2F52CE8000E5B1CC /* Modules */,
+				B3960CBB2F52CE9600E5B1CC /* Entities */,
+				B3960CBC2F52CEA500E5B1CC /* Resources */,
+				B3960CBD2F52CEAC00E5B1CC /* Tests */,
 				B38E9EEF2E4C5C5A005CF625 /* device_menu_item.swift */,
 				B30195FC2E4B941100D9B68A /* usb.swift */,
 				B30BD8902E447135000288DD /* vmdata_builder.swift */,
@@ -124,6 +144,15 @@
 			buildRules = (
 			);
 			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				B3960CB72F52CE5000E5B1CC /* App */,
+				B3960CB82F52CE5A00E5B1CC /* Common */,
+				B3960CB92F52CE6A00E5B1CC /* Core */,
+				B3960CBA2F52CE8000E5B1CC /* Modules */,
+				B3960CBB2F52CE9600E5B1CC /* Entities */,
+				B3960CBC2F52CEA500E5B1CC /* Resources */,
+				B3960CBD2F52CEAC00E5B1CC /* Tests */,
 			);
 			name = hyperosApp;
 			productName = HyperosApp;
@@ -182,6 +211,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B30BD88F2E447110000288DD /* vmdata.swift in Sources */,
+				B365D6EC2F54612E00962023 /* Package.swift in Sources */,
 				8FF8298D27500C060037FA83 /* VMWindowDelegate.swift in Sources */,
 				B30195FD2E4B941A00D9B68A /* usb.swift in Sources */,
 				B3917B8A2E435E770082C557 /* HyperosAppDelegate.swift in Sources */,
@@ -341,12 +371,13 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "$(PROJECT_DIR)/hyperosApp/hyperosApp.entitlements";
 				CODE_SIGN_IDENTITY = "Mac Developer";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -378,12 +409,13 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "$(PROJECT_DIR)/hyperosApp/hyperosApp.entitlements";
 				CODE_SIGN_IDENTITY = "Mac Developer";
-				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "-";
 				CODE_SIGN_INJECT_BASE_ENTITLEMENTS = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				CURRENT_PROJECT_VERSION = 1;
 				DEAD_CODE_STRIPPING = YES;
+				DEVELOPMENT_TEAM = "";
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GENERATE_INFOPLIST_FILE = YES;

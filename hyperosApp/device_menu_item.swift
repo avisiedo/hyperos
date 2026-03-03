@@ -12,6 +12,8 @@ import AppKit
 
 class DeviceMenuItem: NSMenuItem {
     var device: io_object_t
+    
+    var uuid: UUID?
 
     var usbSpeed: Int?
     var deviceSpeed: Int?

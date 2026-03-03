@@ -6,6 +6,8 @@ The app delegate that sets up and starts the virtual machine.
 */
 
 import Virtualization
+import CryptoKit
+import Foundation
 
 
 let bundleExt = ".bundle"
@@ -207,7 +209,7 @@ class VMWindowDelegate: NSObject, NSApplicationDelegate, VZVirtualMachineDelegat
         spiceAgentPort.attachment = VZSpiceAgentPortAttachment()
         consoleDevice.ports[0] = spiceAgentPort
         print("Spice port successfully configured")
-
+        
         return consoleDevice
     }
 
@@ -356,9 +358,13 @@ class VMWindowDelegate: NSObject, NSApplicationDelegate, VZVirtualMachineDelegat
     }
     
     // MARK: USB Discovery
-    
+
     func deviceAdded(_ device: io_object_t) {
-        if device.bDeviceClass != nil && (device.bDeviceClass!) == 9 { return }
+        guard device.locationID != 0 else { return }
+        guard device.idProduct != 0 else { return }
+        guard device.idVendor != 0 else { return }
+        guard device.bDeviceClass != nil && device.bDeviceClass != 9 else { return }
+
         print("deviceAdded: \(device.name() ?? "<unknown>") (\(device.formatted()))")
         let menuItem: DeviceMenuItem = DeviceMenuItem()
         menuItem.device = device
@@ -401,7 +407,7 @@ class VMWindowDelegate: NSObject, NSApplicationDelegate, VZVirtualMachineDelegat
         // TODO Implement actions
         // See: https://docs.getutm.app/guest-support/macos/#missing-features
         // Actually this feature is not supported by the virtualization framework
-        print("attachDeviceMenuItem is not implemented")
+//        self.virtualMachine.usbControllers[0].attach(device: sender.device)
         sender.state = .on
         sender.action = #selector(self.dettachDeviceMenuItem(_:))
     }
@@ -441,3 +447,143 @@ class VMWindowDelegate: NSObject, NSApplicationDelegate, VZVirtualMachineDelegat
         print("stop vm")
     }
 }
+
+// MARK: Documentation from chatgpt-omini
+
+//In a macOS with apple silicon, I am developing by using Swift, and I want to attach a USB device to a VM which is using the virtualization framework; I can enumerate the devices, but no idea how to accommodate to the protocol that require the virtualization framework, specially the uuid; is this something coming from the real USB device? or something we generate to identify the USB device in the application using the framework?
+//
+//.
+//GPT-4o mini
+//To attach a USB device to a virtual machine (VM) using the virtualization framework on macOS with Apple Silicon, you need to understand how to work with the USB device
+//
+//In a macOS with apple silicon, I am developing by using Swift, and I want to attach a USB device to a VM which is using the virtualization framework; I can enumerate the devices, but no idea how to accommodate to the protocol that require the virtualization framework, specially the uuid; is this something coming from the real USB device? or something we generate to identify the USB device in the application using the framework?
+//
+//.
+//GPT-4o mini
+//To attach a USB device to a virtual machine (VM) using the virtualization framework on macOS with Apple Silicon, you need to understand how to work with the USB device's identifiers, particularly the UUID.
+//UUID in the Virtualization Framework
+//
+//Understanding UUID
+//
+//The UUID (Universally Unique Identifier) used in the virtualization framework is not something that comes from the USB device itself. Instead, it is a unique identifier that you generate within your application to identify the USB device when attaching it to the VM. This UUID is essential for managing the device's lifecycle and ensuring that the VM can correctly reference the device.
+//Steps to Attach a USB Device
+//
+//Enumerate USB Devices: You can use the IOKit framework to enumerate the USB devices connected to your macOS system. This will give you access to the properties of each device, including vendor ID, product ID, and other relevant information.
+//Generate a UUID: For each USB device you want to attach, generate a UUID. You can use Swift's UUID() initializer to create a new UUID.
+//swift
+//Copiar Código
+//let usbDeviceUUID = UUID()
+//Create a USB Device Configuration: Use the virtualization framework to create a configuration for the USB device. This typically involves creating an instance of VZUSBDeviceConfiguration and setting its properties, including the generated UUID.
+//Attach the Device to the VM: Finally, you can attach the USB device to the VM using the VZVirtualMachine instance. You will need to add the USB device configuration to the VM's configuration.
+//Example Code Snippet
+//
+//Here’s a simplified example of how you might implement this in Swift:
+//swift
+//Copiar Código
+//import Virtualization
+//import IOKit
+//
+//func attachUSBDevice(to vm: VZVirtualMachine, usbDevice: IOUSBDevice) {
+//    // Generate a UUID for the USB device
+//    let usbDeviceUUID = UUID()
+//    
+//    // Create a USB device configuration
+//    let usbDeviceConfiguration = VZUSBDeviceConfiguration(
+//        identifier: usbDeviceUUID,
+//        vendorID: usbDevice.vendorID,
+//        productID: usbDevice.productID
+//    )
+//    
+//    // Attach the USB device to the VM
+//    do {
+//        try vm.attachUSBDevice(usbDeviceConfiguration)
+//        print("USB device attached with UUID: \(usbDeviceUUID)")
+//    } catch {
+//        print("Failed to attach USB device: \(error)")
+//    }
+//}
+//Summary
+//
+//The UUID is generated by your application to uniquely identify the USB device within the virtualization framework.
+//You need to enumerate the USB devices using IOKit, generate a UUID for each device, create a configuration, and then attach it to the VM.
+//If you have any specific questions about the implementation or need further details, feel free to ask!
+//
+//I would like to take in consideration the BUS where the USB device is connected, so the UUID would be some composition of USB port, vendorID and productID, in that case the UUID would serve to assure that two devices are perfectly identified in the application, and manage the lifecycle of the USB device for the attached VM correctly, or when the device is physically detached to notify to the vm, etc... and keep the list of enumerated USB devices consistent.
+//
+//.
+//GPT-4o mini
+//To effectively manage USB devices in your application, especially when considering the bus and port where the USB device is connected, you can indeed create a more structured UUID or identifier that incorporates various attributes of the USB device. This approach will help ensure that each device is uniquely identified and that you can manage its lifecycle accurately.
+//Creating a Composite Identifier
+//
+//Components of the Identifier
+//
+//You can create a composite identifier that includes:
+//Bus Number: The bus number where the USB device is connected.
+//Port Number: The specific port on the bus.
+//Vendor ID: The unique identifier for the manufacturer of the USB device.
+//Product ID: The unique identifier for the specific product.
+//Generating the Composite Identifier
+//
+//You can concatenate these components into a string format that serves as a unique identifier. Here’s how you might implement this in Swift:
+//swift
+//Copiar Código
+//import Foundation
+//import IOKit
+//
+//func generateCompositeIdentifier(busNumber: Int, portNumber: Int, vendorID: Int, productID: Int) -> String {
+//    return "\(busNumber)-\(portNumber)-\(vendorID)-\(productID)"
+//}
+//Example Usage
+//
+//When enumerating USB devices, you can extract the bus and port information along with the vendor and product IDs, and then generate the composite identifier:
+//swift
+//Copiar Código
+//func attachUSBDevice(to vm: VZVirtualMachine, usbDevice: IOUSBDevice) {
+//    // Extract bus and port information
+//    let busNumber = usbDevice.busNumber // Assuming you have a way to get this
+//    let portNumber = usbDevice.portNumber // Assuming you have a way to get this
+//    let vendorID = usbDevice.vendorID
+//    let productID = usbDevice.productID
+//    
+//    // Generate a composite identifier
+//    let compositeIdentifier = generateCompositeIdentifier(busNumber: busNumber, portNumber: portNumber, vendorID: vendorID, productID: productID)
+//    
+//    // Create a USB device configuration
+//    let usbDeviceConfiguration = VZUSBDeviceConfiguration(
+//        identifier: UUID(uuidString: compositeIdentifier) ?? UUID(),
+//        vendorID: vendorID,
+//        productID: productID
+//    )
+//    
+//    // Attach the USB device to the VM
+//    do {
+//        try vm.attachUSBDevice(usbDeviceConfiguration)
+//        print("USB device attached with identifier: \(compositeIdentifier)")
+//    } catch {
+//        print("Failed to attach USB device: \(error)")
+//    }
+//}
+//Managing Device Lifecycle
+//
+//With this composite identifier, you can effectively manage the lifecycle of the USB device:
+//Attach/Detach Notifications: When a device is physically detached, you can check against your list of composite identifiers to determine which device was removed and notify the VM accordingly.
+//Consistency: By maintaining a list of enumerated USB devices with their composite identifiers, you can ensure that your application accurately reflects the current state of connected devices.
+//Example of Detach Handling
+//
+//You might implement a method to handle device detachment like this:
+//swift
+//Copiar Código
+//func handleDeviceDetachment(compositeIdentifier: String) {
+//    // Logic to find the device in your list and detach it from the VM
+//    if let device = findDeviceByIdentifier(compositeIdentifier) {
+//        // Notify the VM about the detachment
+//        vm.detachUSBDevice(device)
+//        print("USB device detached: \(compositeIdentifier)")
+//    }
+//}
+//Summary
+//
+//Creating a composite identifier that includes bus number, port number, vendor ID, and product ID allows for precise identification of USB devices.
+//This identifier can be used to manage the lifecycle of devices effectively, ensuring that your application remains consistent with the physical state of connected USB devices.
+//Implementing attach and detach notifications based on this identifier will help maintain the integrity of your VM's USB device management.
+//If you have further questions or need more specific examples, feel free to ask!
